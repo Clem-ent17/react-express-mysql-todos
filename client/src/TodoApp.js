@@ -1,15 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './App.css';
 import Header from './components/Header'
 import TodoForm from './components/TodoForm'
 import Container from './components/Container'
+import axios from 'axios'
 
 export default function TodoApp() {
   const [todo, setTodo] = useState({ name: '', completed: false })
-  const [todos, setTodos] = useState([
-    { id: 1, name: "Go grocery shopping", completed: false },
-    { id: 2, name: "Buy snacks", completed: true },
-  ])
+  const [todos, setTodos] = useState([])
+
+  useEffect(() => {
+    async function fetchTodos(){
+      try {
+        const response = await axios('/api/todos')
+        // const fetchedTodos = response.json()
+        // console.log('response', response)
+        // console.log('fetchedTodos', fetchedTodos)
+        setTodos(response.data)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    fetchTodos()
+  }, [])
+  useEffect(() => console.log("todos", todos))
 
   function handleTodo(event){
     setTodo({...todo, name: event.target.value})
@@ -20,8 +34,11 @@ export default function TodoApp() {
     // setTodos(updatedTodos)
   }
 
-  function handleSubmit(event){
+  async function handleSubmit(event){
     event.preventDefault()
+    
+    await axios.post('/api/todos', todo)
+    
     setTodos([...todos, todo])
     setTodo({ name: '', completed: false })
   }
